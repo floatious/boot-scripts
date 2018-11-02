@@ -1,0 +1,29 @@
+## first time build buildroot, you only need to do this once
+
+$ ~/boot-scripts/build_buildroot.sh
+
+$ cd linux/
+
+## first time make defconfig, you only need to do this once
+
+$ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make defconfig
+
+## define your local board ids in ~/boot-scripts/boot
+
+## from now on you can do incremental compile+boot
+## the boot script will:
+## - build the kernel
+## - create a boot image (that uses your buildroot as ramdisk)
+## - boot your boot image
+
+## if you give the boot script a single argument,
+## it will try to fastboot that local board:
+
+$ ~/boot-scripts/boot db820c
+$ ~/boot-scripts/boot db410c
+
+## if you give the boot script two arguments,
+## it will try to cdba boot that SoC on that remote board name:
+
+$ ~/boot-scripts/boot qcs404 evb405-4k-1
+$ ~/boot-scripts/boot qcs404 evb405-1k-1
