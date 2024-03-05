@@ -1,0 +1,74 @@
+#!/bin/sh -e
+
+# EDIT these variables
+# the hostname (or IP address) of your philips hue bridge
+huehostname=001788af30f0
+# see https://developers.meethue.com/develop/get-started-2/ to create an apikey
+hueapikey=PuTyOuRaPiKeYhErE123456789
+# the device ID for your philips hue smart plug
+# use http://$huehostname/api/$hueapikey/lights/ to see the ID for all devices
+huelightid=9
+
+# no need to edit these variables
+board=$1
+tftpdir=/var/lib/tftpboot
+arch=arm64
+compiler=aarch64-linux-gnu-
+image=arch/arm64/boot/Image.gz
+
+if [ -z "$1" ]; then
+	echo "while standing in your kernel directory:"
+	echo ""
+	echo "usage: build_boot <board>"
+	exit
+fi
+
+if [ ! -e ".git" ]; then
+	echo "you are not standing in a git tree or a git worktree"
+	exit
+fi
+
+if [ ! -w "$tftpdir" ]; then
+	echo "please make sure that you have write permission to: $tftpdir"
+	exit
+fi
+
+case $board in
+	rock5b-ep*)
+		# path to DTB within kernel tree
+		dtb=arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb
+		# path to image tree source file within buildroot tree
+		its=~/src/buildroot-rock5b-ep/board/radxa/rock5b/rock5b.its
+		;;
+	rock5b*)
+		# path to DTB within kernel tree
+		dtb=arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb
+		# path to image tree source file within buildroot tree
+		its=~/src/buildroot-rock5b/board/radxa/rock5b/rock5b.its
+		;;
+	*)
+		echo "board: $board is not defined"
+		exit
+esac
+
+rm -rf output/$board
+mkdir -p output/$board
+
+ARCH=$arch CROSS_COMPILE=$compiler make -j$(nproc)
+
+cp $image output/$board/
+cp $dtb output/$board/
+cp $its output/$board/
+
+cd output/$board
+
+mkimage -f $(basename $its) image.itb
+
+mkdir -p $tftpdir/$board
+cp image.itb $tftpdir/$board/
+
+cd -
+
+curl -X PUT -d '{"on":false}' http://$huehostname/api/$hueapikey/lights/$huelightid/state
+sleep 5
+curl -X PUT -d '{"on":true}' http://$huehostname/api/$hueapikey/lights/$huelightid/state
