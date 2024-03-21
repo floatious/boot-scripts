@@ -69,6 +69,6 @@ cp image.itb $tftpdir/$board/
 
 cd -
 
-curl -X PUT -d '{"on":false}' http://$huehostname/api/$hueapikey/lights/$huelightid/state
+curl --no-progress-meter -X PUT -d '{"on":false}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
 sleep 5
-curl -X PUT -d '{"on":true}' http://$huehostname/api/$hueapikey/lights/$huelightid/state
+curl --no-progress-meter -X PUT -d '{"on":true}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
