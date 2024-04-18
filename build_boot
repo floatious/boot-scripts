@@ -10,7 +10,6 @@ hueapikey=PuTyOuRaPiKeYhErE123456789
 huelightid=9
 
 # no need to edit these variables
-board=$1
 tftpdir=/var/lib/tftpboot
 arch=arm64
 compiler=aarch64-linux-gnu-
@@ -19,7 +18,7 @@ image=arch/arm64/boot/Image.gz
 if [ -z "$1" ]; then
 	echo "while standing in your kernel directory:"
 	echo ""
-	echo "usage: build_boot <board>"
+	echo "usage: build_boot [-n] <board>"
 	exit
 fi
 
@@ -31,6 +30,14 @@ fi
 if [ ! -w "$tftpdir" ]; then
 	echo "please make sure that you have write permission to: $tftpdir"
 	exit
+fi
+
+if [ "$1" == -n ]; then
+	power=0
+	board=$2
+else
+	power=1
+	board=$1
 fi
 
 case $board in
@@ -69,6 +76,8 @@ cp image.itb $tftpdir/$board/
 
 cd -
 
-curl --no-progress-meter -X PUT -d '{"on":false}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
-sleep 5
-curl --no-progress-meter -X PUT -d '{"on":true}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
+if [ $power == 1 ]; then
+	curl --no-progress-meter -X PUT -d '{"on":false}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
+	sleep 5
+	curl --no-progress-meter -X PUT -d '{"on":true}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
+fi
