@@ -8,14 +8,12 @@ hueapikey=PuTyOuRaPiKeYhErE123456789
 # the device ID for your philips hue smart plug
 # use http://$huehostname/api/$hueapikey/lights/ to see the ID for all devices
 huelightid=9
-# directory to where you cloned boot-scripts
-bootscripts=~/src/boot-scripts/
 
 # no need to edit these variables
 tftpdir=/var/lib/tftpboot
 arch=arm64
 compiler=aarch64-linux-gnu-
-image=arch/arm64/boot/Image.gz
+image=arch/arm64/boot/Image
 
 if [ -z "$1" ]; then
 	echo "while standing in your kernel directory:"
@@ -43,44 +41,19 @@ else
 fi
 
 case $board in
-	rock5b-ep*)
-		# path to DTB within kernel tree
-		dtb=arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb
-		dtbo1=arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-ep.dtbo
-		dtbo2=arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-srns.dtbo
-		its=$bootscripts/rock5b.its
-		;;
 	rock5b*)
 		# path to DTB within kernel tree
-		dtb=arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb
-		dtbo1=arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-ep.dtbo
-		dtbo2=arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-srns.dtbo
-		its=$bootscripts/rock5b.its
+		## build dtb manually for now
+		##dtb=arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb
 		;;
 	*)
 		echo "board: $board is not defined"
 		exit
 esac
 
-rm -rf output/$board
-mkdir -p output/$board
-
 ARCH=$arch CROSS_COMPILE=$compiler make -j$(nproc)
 
-cp $image output/$board/
-cp $dtb output/$board/
-cp $its output/$board/
-cp $dtbo1 output/$board/
-cp $dtbo2 output/$board/
-
-cd output/$board
-
-mkimage -f $(basename $its) image.itb
-
-mkdir -p $tftpdir/$board
-cp image.itb $tftpdir/$board/
-
-cd -
+cp $image $tftpdir/
 
 if [ $power == 1 ]; then
 	curl --no-progress-meter -X PUT -d '{"on":false}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
