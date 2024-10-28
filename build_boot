@@ -41,10 +41,17 @@ else
 fi
 
 case $board in
+	rock5b-ep*)
+		# path to DTB within kernel tree
+		## build dtb manually for now
+		##dtb=arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb
+		NFS_DIR=/srv/nfs/rootfs_ep
+		;;
 	rock5b*)
 		# path to DTB within kernel tree
 		## build dtb manually for now
 		##dtb=arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb
+		NFS_DIR=/srv/nfs/rootfs_rc
 		;;
 	*)
 		echo "board: $board is not defined"
@@ -54,6 +61,12 @@ esac
 ARCH=$arch CROSS_COMPILE=$compiler make -j$(nproc)
 
 cp $image $tftpdir/
+
+rm -rf tmp-modules/lib/modules/*
+ARCH=$arch CROSS_COMPILE=$compiler make -j$(nproc) -s modules_install INSTALL_MOD_PATH=tmp-modules INSTALL_MOD_STRIP=1
+
+rm -rf $NFS_DIR/lib/modules/*
+cp -r tmp-modules/lib/modules/* $NFS_DIR/lib/modules/
 
 if [ $power == 1 ]; then
 	curl --no-progress-meter -X PUT -d '{"on":false}' http://$huehostname/api/$hueapikey/lights/$huelightid/state > /dev/null
