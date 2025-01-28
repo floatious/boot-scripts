@@ -57,19 +57,29 @@ ARCH=$arch CROSS_COMPILE=$compiler make -j$(nproc) -s modules_install INSTALL_MO
 
 case $board in
 	rock5b-ep*)
+		cp arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb $tftpdir/
+		cp arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-ep.dtbo $tftpdir/
 		NFS_DIR=/srv/nfs/rootfs_ep
 		rm -rf $NFS_DIR/lib/modules/*
 		cp -r tmp-modules/lib/modules/* $NFS_DIR/lib/modules/
 		;;
 	rock5b-rc*)
+		cp arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb $tftpdir/
+		cp arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-srns.dtbo $tftpdir/
 		NFS_DIR=/srv/nfs/rootfs_rc
 		rm -rf $NFS_DIR/lib/modules/*
 		cp -r tmp-modules/lib/modules/* $NFS_DIR/lib/modules/
 		;;
 	rock5b*)
+		# COMMON
+		cp arch/arm64/boot/dts/rockchip/rk3588-rock-5b.dtb $tftpdir/
+		# EP
+		cp arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-ep.dtbo $tftpdir/
 		NFS_DIR=/srv/nfs/rootfs_ep
 		rm -rf $NFS_DIR/lib/modules/*
 		cp -r tmp-modules/lib/modules/* $NFS_DIR/lib/modules/
+		# RC
+		cp arch/arm64/boot/dts/rockchip/rk3588-rock-5b-pcie-srns.dtbo $tftpdir/
 		NFS_DIR=/srv/nfs/rootfs_rc
 		rm -rf $NFS_DIR/lib/modules/*
 		cp -r tmp-modules/lib/modules/* $NFS_DIR/lib/modules/
