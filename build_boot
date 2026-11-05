@@ -49,7 +49,7 @@ case $board in
 		exit
 esac
 
-ARCH=$arch make -j$(nproc) LOCALVERSION=
+ARCH=$arch make -j$(nproc) LOCALVERSION= all compile_commands.json
 
 rm -rf tmp-modules/lib/modules/*
 ARCH=$arch make -j$(nproc) -s modules_install INSTALL_MOD_PATH=tmp-modules INSTALL_MOD_STRIP=1 LOCALVERSION=
