@@ -12,7 +12,6 @@ huelightid=9
 # no need to edit these variables
 tftpdir=/var/lib/tftpboot
 arch=arm64
-compiler=aarch64-linux-gnu-
 image=arch/arm64/boot/Image
 
 if [ -z "$1" ]; then
@@ -50,10 +49,10 @@ case $board in
 		exit
 esac
 
-ARCH=$arch CROSS_COMPILE=$compiler make -j$(nproc)
+ARCH=$arch make -j$(nproc) LOCALVERSION=
 
 rm -rf tmp-modules/lib/modules/*
-ARCH=$arch CROSS_COMPILE=$compiler make -j$(nproc) -s modules_install INSTALL_MOD_PATH=tmp-modules INSTALL_MOD_STRIP=1
+ARCH=$arch make -j$(nproc) -s modules_install INSTALL_MOD_PATH=tmp-modules INSTALL_MOD_STRIP=1 LOCALVERSION=
 
 case $board in
 	rock5b-ep*)
